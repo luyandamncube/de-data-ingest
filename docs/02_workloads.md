@@ -6,16 +6,7 @@
 
 | Deliverable Code | Official Deliverable | Atomic Workload ID |
 |---|---|---|
-| `BRZ_01` | Bronze ingest customers raw with ingestion timestamp | `s1_b01_ingest_customers_raw` |
-| `BRZ_01` | Bronze ingest customers raw with ingestion timestamp | `s1_b04_bronze_contract` |
-| `BRZ_02` | Bronze ingest accounts raw with ingestion timestamp | `s1_b02_ingest_accounts_raw` |
-| `BRZ_02` | Bronze ingest accounts raw with ingestion timestamp | `s1_b04_bronze_contract` |
-| `BRZ_03` | Bronze ingest transactions raw with ingestion timestamp | `s1_b03_ingest_transactions_raw` |
-| `BRZ_03` | Bronze ingest transactions raw with ingestion timestamp | `s1_b04_bronze_contract` |
-| `BRZ_04` | Bronze outputs are distinct, raw, Delta, and partitioned by source | `s1_b01_ingest_customers_raw` |
-| `BRZ_04` | Bronze outputs are distinct, raw, Delta, and partitioned by source | `s1_b02_ingest_accounts_raw` |
-| `BRZ_04` | Bronze outputs are distinct, raw, Delta, and partitioned by source | `s1_b03_ingest_transactions_raw` |
-| `BRZ_04` | Bronze outputs are distinct, raw, Delta, and partitioned by source | `s1_b04_bronze_contract` |
+git 
 | `SLV_01` | Standardise customers types and date formats | `s1_s01_customers_cast_dates` |
 | `SLV_02` | Standardise accounts types and date formats | `s1_s02_accounts_cast_dates` |
 | `SLV_03` | Standardise transactions types and date formats | `s1_s03_transactions_parse_standardise` |
