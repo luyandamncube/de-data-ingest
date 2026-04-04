@@ -14,4 +14,4 @@ COPY config/ config/
 
 # Entry point — must run the complete pipeline end-to-end without interactive input.
 # The scoring system uses this CMD directly; do not require TTY or stdin.
-CMD ["python", "pipeline/run_all.py"]
+CMD ["python", "-m", "pipeline.run_all"]
