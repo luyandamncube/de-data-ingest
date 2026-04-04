@@ -50,6 +50,12 @@ docker run --rm \
   my-submission:test
 ```
 
+### Run test harness
+
+```bash
+bash infrastructure/run_tests.sh --stage 1 --data-dir /tmp/test-data --image my-submission:test
+```
+
 ### Check outputs
 
 ```bash
