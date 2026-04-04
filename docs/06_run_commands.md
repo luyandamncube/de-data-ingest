@@ -56,6 +56,14 @@ docker run --rm \
 bash infrastructure/run_tests.sh --stage 1 --data-dir /tmp/test-data --image my-submission:test 
 ```
 
+### Verify pipeline processing
+
+```bash
+sed -n '1,200p' pipeline/run_all.py
+sed -n '1,200p' pipeline/ingest.py
+sed -n '1,200p' pipeline/transform.py
+sed -n '1,200p' pipeline/provision.py
+```
 ### Check outputs
 
 ```bash
