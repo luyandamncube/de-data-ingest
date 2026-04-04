@@ -24,10 +24,20 @@ docker build -t nedbank-de-challenge/base:1.0 -f infrastructure/Dockerfile.base 
 ```bash
 docker build -t my-submission:test .
 ```
+### Copy data
+```bash
+mkdir -p /tmp/test-data/input /tmp/test-data/config /tmp/test-data/output
+
+cp data/accounts.csv /tmp/test-data/input/
+cp data/customers.csv /tmp/test-data/input/
+cp data/transactions.jsonl /tmp/test-data/input/
+cp config/pipeline_config.yaml /tmp/test-data/config/
+```
 
 ### Run locally
 
 > Ensure your mounted data directory contains `/input`, `/config`, and `/output` subdirectories.
+
 
 ```bash
 docker run --rm \
