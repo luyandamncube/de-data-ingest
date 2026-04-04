@@ -1,19 +1,33 @@
 ## 12. Run commands
 
-### Copy the starter kit
+> Note: `nedbank-de-challenge/base:1.0` is a **local base image** built from `infrastructure/Dockerfile.base`. 
+
+### Copy the starter kit and required support files
 
 ```bash
 cp -r stage1/starter_kit ./submission
+mkdir -p submission/infrastructure submission/docs
+cp stage1/infrastructure/Dockerfile.base submission/infrastructure/
+cp stage1/infrastructure/run_tests.sh submission/
+cp stage1/docs/validation_queries.sql submission/docs/
 cd submission
 ```
 
-### Build the image
+### Build the local base image
+
+```bash
+docker build -t nedbank-de-challenge/base:1.0 -f infrastructure/Dockerfile.base .
+```
+
+### Build the submission image
 
 ```bash
 docker build -t my-submission:test .
 ```
 
 ### Run locally
+
+> Ensure your mounted data directory contains `/input`, `/config`, and `/output` subdirectories.
 
 ```bash
 docker run --rm \
