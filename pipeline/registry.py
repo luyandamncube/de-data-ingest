@@ -162,13 +162,13 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Controlled benchmark platform for Stage 1",
         family="docker_smoke",
         variant="pyspark_customers_aggregation",
-        candidate_engines=("pyspark_delta",),
+        candidate_engines=("pyspark_delta", "polars"),
         validation_gate=(
-            "Host orchestrator can execute a real PySpark workload over "
+            "Host orchestrator can execute a real engine-backed workload over "
             "customers.csv and emit a result record"
         ),
         description=(
-            "Real PySpark smoke workload that aggregates the mounted "
+            "Real engine-backed smoke workload that aggregates the mounted "
             "customers dataset."
         ),
         implementations=ImplementationBundle(
@@ -176,6 +176,9 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
                 "benchmarks.workloads.smoke."
                 "bm_07_customers_pyspark_aggregation:run"
             ),
+            engine_sql_refs={
+                "polars": "benchmarks/sql/common/bm_07_customers_aggregation.sql"
+            },
             common_sql_ref="benchmarks/sql/common/bm_07_customers_aggregation.sql",
         ),
     ),
