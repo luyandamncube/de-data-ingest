@@ -13,9 +13,22 @@ class BenchmarkResult:
     engine: str
     dataset_profile: str
     correct: bool
+    exit_code: int
+    failure_type: str | None
     elapsed_seconds: float
+    workload_exec_seconds: float | None
+    cold_start_seconds: float | None
     peak_memory_mb: float | None
+    tmp_peak_mb: float | None
+    rows_in: int | None
+    rows_out: int | None
+    cpu_user_seconds: float | None
+    cpu_pct: float | None
+    image_size_mb: float | None
+    delta_write_seconds: float | None
+    delta_read_seconds: float | None
     delta_roundtrip_ok: bool
+    output_file_count: int | None
     notes: str = ""
     selected: bool = False
 
@@ -57,9 +70,22 @@ def build_sample_result(
         engine=engine,
         dataset_profile=dataset_profile,
         correct=True,
+        exit_code=0,
+        failure_type=None,
         elapsed_seconds=0.0,
+        workload_exec_seconds=0.0,
+        cold_start_seconds=0.0,
         peak_memory_mb=None,
+        tmp_peak_mb=None,
+        rows_in=None,
+        rows_out=None,
+        cpu_user_seconds=None,
+        cpu_pct=None,
+        image_size_mb=None,
+        delta_write_seconds=None,
+        delta_read_seconds=None,
         delta_roundtrip_ok=False,
+        output_file_count=None,
         notes=notes,
         selected=False,
     )
