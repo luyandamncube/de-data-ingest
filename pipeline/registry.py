@@ -10,7 +10,7 @@ implementations yet.
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import asdict, dataclass, field
 from enum import StrEnum
 
 
@@ -32,6 +32,29 @@ class TrackingRole(StrEnum):
 
 
 @dataclass(frozen=True, slots=True)
+class ImplementationBundle:
+    """Hybrid implementation references for one workload code.
+
+    Resolution order is handled outside the registry. The registry stays purely
+    declarative so one workload code can later fan out to Python and/or SQL
+    implementations depending on the selected engine.
+    """
+
+    common_python_ref: str | None = None
+    common_sql_ref: str | None = None
+    engine_python_refs: dict[str, str] = field(default_factory=dict)
+    engine_sql_refs: dict[str, str] = field(default_factory=dict)
+
+    def as_dict(self) -> dict[str, object]:
+        return {
+            "common_python_ref": self.common_python_ref,
+            "common_sql_ref": self.common_sql_ref,
+            "engine_python_refs": dict(self.engine_python_refs),
+            "engine_sql_refs": dict(self.engine_sql_refs),
+        }
+
+
+@dataclass(frozen=True, slots=True)
 class TrackingUnit:
     id: str
     stage: str
@@ -43,11 +66,15 @@ class TrackingUnit:
     candidate_engines: tuple[str, ...]
     validation_gate: str
     description: str
+    implementations: ImplementationBundle = field(
+        default_factory=ImplementationBundle
+    )
 
     def as_dict(self) -> dict[str, object]:
         data = asdict(self)
         data["role"] = self.role.value
         data["candidate_engines"] = list(self.candidate_engines)
+        data["implementations"] = self.implementations.as_dict()
         return data
 
 
@@ -111,6 +138,46 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         candidate_engines=(),
         validation_gate="Docs and registry stay aligned on roles and ownership",
         description="Workload catalog normalization support.",
+    ),
+    TrackingUnit(
+        id="BM_06",
+        stage="stage1",
+        role=TrackingRole.BENCHMARK_SUPPORT,
+        branch_owner="feature/stage1-benchmark-suite",
+        parent_requirement="Controlled benchmark platform for Stage 1",
+        family="docker_smoke",
+        variant="container_loop_validation",
+        candidate_engines=SHORTLIST_ENGINES,
+        validation_gate="Host orchestrator can build an image, run sequential containers, and emit result records",
+        description="Dummy Docker smoke workload for validating the benchmark loop.",
+        implementations=ImplementationBundle(
+            common_python_ref="benchmarks.workloads.smoke.bm_06_docker_smoke:run"
+        ),
+    ),
+    TrackingUnit(
+        id="BM_07",
+        stage="stage1",
+        role=TrackingRole.BENCHMARK_SUPPORT,
+        branch_owner="feature/stage1-benchmark-suite",
+        parent_requirement="Controlled benchmark platform for Stage 1",
+        family="docker_smoke",
+        variant="pyspark_customers_aggregation",
+        candidate_engines=("pyspark_delta",),
+        validation_gate=(
+            "Host orchestrator can execute a real PySpark workload over "
+            "customers.csv and emit a result record"
+        ),
+        description=(
+            "Real PySpark smoke workload that aggregates the mounted "
+            "customers dataset."
+        ),
+        implementations=ImplementationBundle(
+            common_python_ref=(
+                "benchmarks.workloads.smoke."
+                "bm_07_customers_pyspark_aggregation:run"
+            ),
+            common_sql_ref="benchmarks/sql/common/bm_07_customers_aggregation.sql",
+        ),
     ),
     TrackingUnit(
         id="BRZ_01",
