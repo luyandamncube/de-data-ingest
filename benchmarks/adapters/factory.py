@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from benchmarks.adapters.base import EngineAdapter
+from benchmarks.adapters.polars import PolarsAdapter
 from benchmarks.adapters.pyspark_delta import PySparkDeltaAdapter
 from benchmarks.adapters.simulated import SimulatedAdapter
 from pipeline.registry import SHORTLIST_ENGINES
@@ -15,4 +16,6 @@ def get_adapter(engine: str) -> EngineAdapter:
         raise ValueError(f"unsupported engine: {engine}")
     if engine == "pyspark_delta":
         return PySparkDeltaAdapter()
+    if engine == "polars":
+        return PolarsAdapter()
     return SimulatedAdapter(engine)
