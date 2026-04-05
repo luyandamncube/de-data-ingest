@@ -25,7 +25,7 @@ The intended benchmark loop is:
 Right now, the Docker loop is real and supports:
 
 - `BM_06`: dummy orchestration validation
-- `BM_07`: real PySpark aggregation over `customers.csv`
+- `BM_07`: real engine-backed aggregation over `customers.csv`
 
 That lets us validate both the container loop and a genuine engine-backed run
 before we implement real Bronze, Silver, or Gold workloads on their dedicated
@@ -66,7 +66,7 @@ Run again without rebuilding:
 python -m benchmarks.orchestrator docker-smoke \
   --image de-data-ingest-bench:test \
   --data-dir "$(pwd)/data" \
-  --engine pyspark_delta \
+  --engine polars \
   --workload-id BM_06,BM_07 \
   --attempts 3
 ```
@@ -89,7 +89,8 @@ python -m benchmarks.orchestrator docker-smoke \
 - The benchmark image is separate from the submission image on purpose.
 - The Docker profile mirrors the challenge style: `--network=none`,
   `--memory=2g`, `--cpus=2`, `--read-only`, and `--tmpfs /tmp`.
-- `BM_07` is intentionally small. It is a real engine-backed workload, but it
-  is still only a smoke benchmark, not a Bronze/Silver/Gold implementation.
+- `BM_07` is intentionally small. It is a real engine-backed workload for
+  `pyspark_delta` and `polars`, but it is still only a smoke benchmark, not a
+  Bronze/Silver/Gold implementation.
 - Real benchmark value arrives incrementally as executable workloads land on the
   Bronze, Silver, and Gold branches.
