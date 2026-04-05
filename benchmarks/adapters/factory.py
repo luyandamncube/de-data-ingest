@@ -1,0 +1,18 @@
+"""Factory helpers for benchmark engine adapters."""
+
+from __future__ import annotations
+
+from benchmarks.adapters.base import EngineAdapter
+from benchmarks.adapters.pyspark_delta import PySparkDeltaAdapter
+from benchmarks.adapters.simulated import SimulatedAdapter
+from pipeline.registry import SHORTLIST_ENGINES
+
+
+def get_adapter(engine: str) -> EngineAdapter:
+    """Return an adapter for the requested engine name."""
+
+    if engine not in SHORTLIST_ENGINES:
+        raise ValueError(f"unsupported engine: {engine}")
+    if engine == "pyspark_delta":
+        return PySparkDeltaAdapter()
+    return SimulatedAdapter(engine)
