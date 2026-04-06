@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 from benchmarks.adapters.base import EngineAdapter
+from benchmarks.adapters.clickhouse_local import ClickHouseLocalAdapter
 from benchmarks.adapters.datafusion import DataFusionAdapter
+from benchmarks.adapters.duckdb import DuckDBAdapter
 from benchmarks.adapters.polars import PolarsAdapter
 from benchmarks.adapters.pyspark_delta import PySparkDeltaAdapter
 from benchmarks.adapters.simulated import SimulatedAdapter
@@ -21,4 +23,8 @@ def get_adapter(engine: str) -> EngineAdapter:
         return PolarsAdapter()
     if engine == "datafusion":
         return DataFusionAdapter()
+    if engine == "duckdb":
+        return DuckDBAdapter()
+    if engine == "clickhouse_local":
+        return ClickHouseLocalAdapter()
     return SimulatedAdapter(engine)

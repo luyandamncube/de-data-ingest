@@ -15,6 +15,7 @@ most suitable implementation it has available.
 Directory roles:
 
 - `common/`: shared SQL that may work across multiple engines
+- `clickhouse/`: clickhouse-local specific SQL assets
 - `spark/`: Spark-specific SQL overrides
 - `duckdb/`: DuckDB-specific SQL overrides
 - `datafusion/`: DataFusion-specific SQL overrides

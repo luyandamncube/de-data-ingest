@@ -66,7 +66,7 @@ Run again without rebuilding:
 python -m benchmarks.orchestrator docker-smoke \
   --image de-data-ingest-bench:test \
   --data-dir "$(pwd)/data" \
-  --engine datafusion \
+  --engine clickhouse_local \
   --workload-id BM_06,BM_07 \
   --attempts 3
 ```
@@ -90,7 +90,8 @@ python -m benchmarks.orchestrator docker-smoke \
 - The Docker profile mirrors the challenge style: `--network=none`,
   `--memory=2g`, `--cpus=2`, `--read-only`, and `--tmpfs /tmp`.
 - `BM_07` is intentionally small. It is a real engine-backed workload for
-  `pyspark_delta`, `polars`, and `datafusion`, but it is still only a smoke
-  benchmark, not a Bronze/Silver/Gold implementation.
+  `pyspark_delta`, `polars`, `datafusion`, `duckdb`, and `clickhouse_local`,
+  but it is still only a smoke benchmark, not a Bronze/Silver/Gold
+  implementation.
 - Real benchmark value arrives incrementally as executable workloads land on the
   Bronze, Silver, and Gold branches.

@@ -19,6 +19,7 @@ SHORTLIST_ENGINES = (
     "polars",
     "datafusion",
     "duckdb",
+    "clickhouse_local",
     "pyarrow_acero",
 )
 
@@ -162,7 +163,13 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Controlled benchmark platform for Stage 1",
         family="docker_smoke",
         variant="pyspark_customers_aggregation",
-        candidate_engines=("pyspark_delta", "polars", "datafusion"),
+        candidate_engines=(
+            "pyspark_delta",
+            "polars",
+            "datafusion",
+            "duckdb",
+            "clickhouse_local",
+        ),
         validation_gate=(
             "Host orchestrator can execute a real engine-backed workload over "
             "customers.csv and emit a result record"
@@ -179,6 +186,11 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
             engine_sql_refs={
                 "polars": "benchmarks/sql/common/bm_07_customers_aggregation.sql",
                 "datafusion": "benchmarks/sql/common/bm_07_customers_aggregation.sql",
+                "duckdb": "benchmarks/sql/common/bm_07_customers_aggregation.sql",
+                "clickhouse_local": (
+                    "benchmarks/sql/clickhouse/"
+                    "bm_07_customers_aggregation.sql"
+                ),
             },
             common_sql_ref="benchmarks/sql/common/bm_07_customers_aggregation.sql",
         ),
