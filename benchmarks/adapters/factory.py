@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from benchmarks.adapters.base import EngineAdapter
+from benchmarks.adapters.datafusion import DataFusionAdapter
 from benchmarks.adapters.polars import PolarsAdapter
 from benchmarks.adapters.pyspark_delta import PySparkDeltaAdapter
 from benchmarks.adapters.simulated import SimulatedAdapter
@@ -18,4 +19,6 @@ def get_adapter(engine: str) -> EngineAdapter:
         return PySparkDeltaAdapter()
     if engine == "polars":
         return PolarsAdapter()
+    if engine == "datafusion":
+        return DataFusionAdapter()
     return SimulatedAdapter(engine)
