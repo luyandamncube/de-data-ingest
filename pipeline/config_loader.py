@@ -31,6 +31,7 @@ class OutputConfig:
 class SparkConfig:
     master: str
     app_name: str
+    local_dir: str | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -73,6 +74,7 @@ def load_config(config_path: str | None = None) -> PipelineConfig:
         spark=SparkConfig(
             master=_require_string(spark_section, "master"),
             app_name=_require_string(spark_section, "app_name"),
+            local_dir=_optional_string(spark_section, "local_dir"),
         ),
     )
 
