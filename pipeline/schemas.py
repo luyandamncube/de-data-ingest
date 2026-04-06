@@ -5,9 +5,10 @@ from __future__ import annotations
 from pyspark.sql import types as T
 
 
-# Bronze stays as close to the landed source as possible. CSV fields remain
-# strings, and JSON leaves are modeled as strings so Stage 2 type variants can
-# still be ingested without silently nulling values on read.
+# Bronze stays close to the landed source while still using a few source-aligned
+# primitive types where the Stage 1 contract is stable enough to be useful.
+# Stage 2 compatibility is still handled by keeping date-like values as strings
+# and allowing nullable fields where the source can vary.
 BRONZE_CUSTOMERS_SCHEMA = T.StructType(
     [
         T.StructField("customer_id", T.StringType(), True),
@@ -52,7 +53,7 @@ BRONZE_TRANSACTIONS_SCHEMA = T.StructType(
         T.StructField("transaction_type", T.StringType(), True),
         T.StructField("merchant_category", T.StringType(), True),
         T.StructField("merchant_subcategory", T.StringType(), True),
-        T.StructField("amount", T.StringType(), True),
+        T.StructField("amount", T.DecimalType(18, 2), True),
         T.StructField("currency", T.StringType(), True),
         T.StructField("channel", T.StringType(), True),
         T.StructField(
@@ -72,7 +73,7 @@ BRONZE_TRANSACTIONS_SCHEMA = T.StructType(
                 [
                     T.StructField("device_id", T.StringType(), True),
                     T.StructField("session_id", T.StringType(), True),
-                    T.StructField("retry_flag", T.StringType(), True),
+                    T.StructField("retry_flag", T.BooleanType(), True),
                 ]
             ),
             True,

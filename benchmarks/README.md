@@ -98,7 +98,7 @@ python -m benchmarks.orchestrator docker-smoke \
   currently implemented for `pyspark_delta`, `polars`, and `pyarrow_acero`.
 - `BRZ_02` is now wired into the benchmark suite for the same three engines so
   `accounts.csv` can be compared on the same Bronze Delta contract.
-- `BRZ_03` now has a first PySpark baseline plus a Polars challenger so
-  `transactions.jsonl` can be benchmarked on the raw nested Bronze contract.
+- `BRZ_03` now has PySpark, Polars, and PyArrow benchmark paths so
+  `transactions.jsonl` can be compared on the raw nested Bronze contract.
 - Real benchmark value arrives incrementally as executable workloads land on the
   Bronze, Silver, and Gold branches.

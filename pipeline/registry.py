@@ -266,7 +266,7 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Ingest transactions.jsonl to Bronze",
         family="bronze_ingest",
         variant="transactions_jsonl_raw",
-        candidate_engines=("pyspark_delta", "polars"),
+        candidate_engines=("pyspark_delta", "polars", "pyarrow_acero"),
         validation_gate="Bronze transactions Delta table created and readable",
         description="Raw transaction JSONL ingest with nested schema application.",
         implementations=ImplementationBundle(
@@ -278,6 +278,10 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
                 "polars": (
                     "benchmarks.workloads.bronze."
                     "brz_03_ingest_transactions_raw_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.bronze."
+                    "brz_03_ingest_transactions_raw_pyarrow:run"
                 ),
             }
         ),

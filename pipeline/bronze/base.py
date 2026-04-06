@@ -32,5 +32,15 @@ class BronzeIngestAdapter(ABC):
     ) -> None:
         """Ingest accounts.csv into the Bronze layer."""
 
+    @abstractmethod
+    def ingest_transactions(
+        self,
+        *,
+        input_path: str,
+        output_path: str,
+        run_timestamp: datetime,
+    ) -> None:
+        """Ingest transactions.jsonl into the Bronze layer."""
+
     def close(self) -> None:
         """Release engine resources if needed."""

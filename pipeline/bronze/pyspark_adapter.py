@@ -9,6 +9,7 @@ from pipeline.bronze.base import BronzeIngestAdapter
 from pipeline.config_loader import SparkConfig
 from pipeline.schemas import BRONZE_ACCOUNTS_SCHEMA
 from pipeline.schemas import BRONZE_CUSTOMERS_SCHEMA
+from pipeline.schemas import BRONZE_TRANSACTIONS_SCHEMA
 from pipeline.spark_utils import build_spark_session
 
 
@@ -60,6 +61,29 @@ class PySparkBronzeAdapter(BronzeIngestAdapter):
         )
         (
             accounts_df.withColumn(
+                "ingestion_timestamp",
+                F.lit(run_timestamp).cast("timestamp"),
+            )
+            .write.format("delta")
+            .mode("overwrite")
+            .save(output_path)
+        )
+
+    def ingest_transactions(
+        self,
+        *,
+        input_path: str,
+        output_path: str,
+        run_timestamp: datetime,
+    ) -> None:
+        from pyspark.sql import functions as F
+
+        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        transactions_df = self._spark.read.schema(BRONZE_TRANSACTIONS_SCHEMA).json(
+            input_path
+        )
+        (
+            transactions_df.withColumn(
                 "ingestion_timestamp",
                 F.lit(run_timestamp).cast("timestamp"),
             )

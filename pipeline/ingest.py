@@ -67,8 +67,12 @@ def run_ingestion() -> None:
             run_timestamp=run_timestamp,
         )
 
-        # TODO: Implement BRZ_03 using the same run_timestamp:
-        #   - transactions.jsonl -> bronze/transactions
+        transactions_adapter = get_adapter(config.ingest.engines.transactions)
+        transactions_adapter.ingest_transactions(
+            input_path=config.input.transactions_path,
+            output_path=config.bronze_table_path("transactions"),
+            run_timestamp=run_timestamp,
+        )
     finally:
         for adapter in adapters.values():
             adapter.close()
