@@ -2,6 +2,10 @@
 
 from __future__ import annotations
 
+import os
+from pathlib import Path
+
+import pyspark
 from pyspark.sql import SparkSession
 
 from pipeline.config_loader import SparkConfig
@@ -9,6 +13,8 @@ from pipeline.config_loader import SparkConfig
 
 def build_spark_session(config: SparkConfig) -> SparkSession:
     """Create a Delta-enabled local Spark session"""
+
+    _prepare_spark_environment()
 
     builder = (
         SparkSession.builder.appName(config.app_name)
@@ -32,3 +38,18 @@ def build_spark_session(config: SparkConfig) -> SparkSession:
         builder = builder.config("spark.local.dir", config.local_dir)
 
     return builder.getOrCreate()
+
+
+def _prepare_spark_environment() -> None:
+    spark_home = Path(pyspark.__file__).resolve().parent
+    spark_bin = str(spark_home / "bin")
+
+    os.environ["SPARK_HOME"] = str(spark_home)
+    os.environ["PYSPARK_PYTHON"] = "python3"
+    os.environ["SPARK_LOCAL_IP"] = "127.0.0.1"
+    os.environ["SPARK_LOCAL_HOSTNAME"] = "localhost"
+
+    current_path = os.environ.get("PATH", "")
+    path_entries = current_path.split(":") if current_path else []
+    if spark_bin not in path_entries:
+        os.environ["PATH"] = f"{spark_bin}:{current_path}" if current_path else spark_bin

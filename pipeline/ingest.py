@@ -27,7 +27,13 @@ Spark configuration tip:
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
+
+from pyspark.sql import DataFrame
+from pyspark.sql import functions as F
+
 from pipeline.config_loader import load_config
+from pipeline.schemas import BRONZE_CUSTOMERS_SCHEMA
 from pipeline.spark_utils import build_spark_session
 
 
@@ -36,13 +42,43 @@ def run_ingestion() -> None:
 
     config = load_config()
     spark = build_spark_session(config.spark)
+    run_timestamp = _run_ingestion_timestamp()
     try:
-        # TODO: Implement Bronze layer ingestion.
-        #
-        # Suggested steps:
-        #   1. Read the raw mounted inputs using explicit Bronze schemas.
-        #   2. Add a single run-level ingestion_timestamp across all sources.
-        #   3. Write accounts, transactions, and customers to Bronze Delta paths.
-        _ = (config, spark)
+        customers_df = _read_customers_raw(spark, config.input.customers_path)
+        _write_bronze_table(
+            df=_with_ingestion_timestamp(customers_df, run_timestamp),
+            output_path=config.bronze_table_path("customers"),
+        )
+
+        # TODO: Implement BRZ_02 and BRZ_03 using the same run_timestamp:
+        #   - accounts.csv -> bronze/accounts
+        #   - transactions.jsonl -> bronze/transactions
     finally:
         spark.stop()
+
+
+def _run_ingestion_timestamp() -> datetime:
+    """Return one UTC timestamp shared across the Bronze ingestion run."""
+
+    return datetime.now(timezone.utc).replace(microsecond=0, tzinfo=None)
+
+
+def _read_customers_raw(spark, input_path: str) -> DataFrame:
+    return (
+        spark.read.option("header", True)
+        .schema(BRONZE_CUSTOMERS_SCHEMA)
+        .csv(input_path)
+    )
+
+
+def _with_ingestion_timestamp(df: DataFrame, run_timestamp: datetime) -> DataFrame:
+    return df.withColumn("ingestion_timestamp", F.lit(run_timestamp).cast("timestamp"))
+
+
+def _write_bronze_table(*, df: DataFrame, output_path: str) -> None:
+    (
+        df.write.format("delta")
+        .mode("overwrite")
+        .option("overwriteSchema", "true")
+        .save(output_path)
+    )

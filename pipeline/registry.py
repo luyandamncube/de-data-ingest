@@ -210,9 +210,17 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Ingest customers.csv to Bronze",
         family="bronze_ingest",
         variant="customers_csv_raw",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("pyspark_delta",),
         validation_gate="Bronze customers Delta table created and readable",
         description="Raw customers CSV ingest with explicit schema application.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "pyspark_delta": (
+                    "benchmarks.workloads.bronze."
+                    "brz_01_ingest_customers_raw:run"
+                )
+            }
+        ),
     ),
     TrackingUnit(
         id="BRZ_02",
