@@ -54,7 +54,7 @@ ingest:
   engines:
     customers: polars
     accounts: polars
-    transactions: pyspark_delta
+    transactions: polars
 
 # ── DQ rules reference ────────────────────────────────────────
 # Stage 2+: path to the DQ rules file. Your pipeline must read

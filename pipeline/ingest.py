@@ -32,6 +32,7 @@ from pathlib import Path
 
 from pipeline.bronze.factory import build_bronze_adapter
 from pipeline.config_loader import load_config
+from pipeline.gates.bronze_validation import validate_bronze_outputs
 
 
 def run_ingestion() -> None:
@@ -71,6 +72,10 @@ def run_ingestion() -> None:
         transactions_adapter.ingest_transactions(
             input_path=config.input.transactions_path,
             output_path=config.bronze_table_path("transactions"),
+            run_timestamp=run_timestamp,
+        )
+        validate_bronze_outputs(
+            config=config,
             run_timestamp=run_timestamp,
         )
     finally:
