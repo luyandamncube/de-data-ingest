@@ -19,7 +19,7 @@ BRONZE_CUSTOMERS_SCHEMA = T.StructType(
         T.StructField("province", T.StringType(), True),
         T.StructField("income_band", T.StringType(), True),
         T.StructField("segment", T.StringType(), True),
-        T.StructField("risk_score", T.StringType(), True),
+        T.StructField("risk_score", T.IntegerType(), True),
         T.StructField("kyc_status", T.StringType(), True),
         T.StructField("product_flags", T.StringType(), True),
     ]
@@ -36,8 +36,8 @@ BRONZE_ACCOUNTS_SCHEMA = T.StructType(
         T.StructField("product_tier", T.StringType(), True),
         T.StructField("mobile_number", T.StringType(), True),
         T.StructField("digital_channel", T.StringType(), True),
-        T.StructField("credit_limit", T.StringType(), True),
-        T.StructField("current_balance", T.StringType(), True),
+        T.StructField("credit_limit", T.DecimalType(18, 2), True),
+        T.StructField("current_balance", T.DecimalType(18, 2), True),
         T.StructField("last_activity_date", T.StringType(), True),
     ]
 )
@@ -79,4 +79,3 @@ BRONZE_TRANSACTIONS_SCHEMA = T.StructType(
         ),
     ]
 )
-
