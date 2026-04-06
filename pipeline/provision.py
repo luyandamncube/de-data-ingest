@@ -28,8 +28,15 @@ Requirements:
 See output_schema_spec.md for the complete field-by-field specification.
 """
 
+from pathlib import Path
+
+from pipeline.config_loader import load_config
+
 
 def run_provisioning():
+    config = load_config()
+    Path(config.output.gold_path).mkdir(parents=True, exist_ok=True)
+
     # TODO: Implement Gold layer provisioning.
     #
     # Suggested steps:
