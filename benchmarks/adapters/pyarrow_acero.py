@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 from benchmarks.adapters.base import BenchmarkExecution, EngineAdapter
 from benchmarks.implementation_resolver import ResolvedImplementation
 from pipeline.registry import TrackingUnit
@@ -21,7 +23,7 @@ class PyArrowAceroAdapter(EngineAdapter):
         return True
 
     def supported_families(self) -> tuple[str, ...]:
-        return ("docker_smoke",)
+        return ("docker_smoke", "bronze_ingest")
 
     def run(
         self,
@@ -41,6 +43,7 @@ class PyArrowAceroAdapter(EngineAdapter):
             workload=workload,
             dataset_profile=dataset_profile,
             attempt=attempt,
+            data_root=Path("/benchmarks/data"),
         )
         execution.notes = (
             f"{execution.notes}; adapter=pyarrow_acero; impl={implementation.ref}"

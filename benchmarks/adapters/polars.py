@@ -25,7 +25,7 @@ class PolarsAdapter(EngineAdapter):
         return True
 
     def supported_families(self) -> tuple[str, ...]:
-        return ("docker_smoke",)
+        return ("docker_smoke", "bronze_ingest")
 
     def run(
         self,
@@ -66,6 +66,7 @@ class PolarsAdapter(EngineAdapter):
             workload=workload,
             dataset_profile=dataset_profile,
             attempt=attempt,
+            data_root=Path("/benchmarks/data"),
         )
         execution.notes = (
             f"{execution.notes}; adapter=polars; impl={implementation.ref}"
