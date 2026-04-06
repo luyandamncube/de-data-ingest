@@ -28,33 +28,28 @@ Spark configuration tip:
 from __future__ import annotations
 
 from datetime import datetime, timezone
-
-from pyspark.sql import DataFrame
-from pyspark.sql import functions as F
+from pathlib import Path
+from typing import Any
 
 from pipeline.config_loader import load_config
 from pipeline.schemas import BRONZE_CUSTOMERS_SCHEMA
-from pipeline.spark_utils import build_spark_session
 
 
 def run_ingestion() -> None:
     """Run the Bronze ingestion entrypoint."""
 
     config = load_config()
-    spark = build_spark_session(config.spark)
+    Path(config.output.bronze_path).mkdir(parents=True, exist_ok=True)
     run_timestamp = _run_ingestion_timestamp()
-    try:
-        customers_df = _read_customers_raw(spark, config.input.customers_path)
-        _write_bronze_table(
-            df=_with_ingestion_timestamp(customers_df, run_timestamp),
-            output_path=config.bronze_table_path("customers"),
-        )
+    customers_df = _read_customers_raw(config.input.customers_path)
+    _write_bronze_table(
+        df=_with_ingestion_timestamp(customers_df, run_timestamp),
+        output_path=config.bronze_table_path("customers"),
+    )
 
-        # TODO: Implement BRZ_02 and BRZ_03 using the same run_timestamp:
-        #   - accounts.csv -> bronze/accounts
-        #   - transactions.jsonl -> bronze/transactions
-    finally:
-        spark.stop()
+    # TODO: Implement BRZ_02 and BRZ_03 using the same run_timestamp:
+    #   - accounts.csv -> bronze/accounts
+    #   - transactions.jsonl -> bronze/transactions
 
 
 def _run_ingestion_timestamp() -> datetime:
@@ -63,22 +58,28 @@ def _run_ingestion_timestamp() -> datetime:
     return datetime.now(timezone.utc).replace(microsecond=0, tzinfo=None)
 
 
-def _read_customers_raw(spark, input_path: str) -> DataFrame:
-    return (
-        spark.read.option("header", True)
-        .schema(BRONZE_CUSTOMERS_SCHEMA)
-        .csv(input_path)
+def _polars_string_schema() -> dict[str, Any]:
+    import polars as pl
+
+    return {field.name: pl.String for field in BRONZE_CUSTOMERS_SCHEMA.fields}
+
+
+def _read_customers_raw(input_path: str):
+    import polars as pl
+
+    return pl.read_csv(
+        input_path,
+        schema=_polars_string_schema(),
     )
 
 
-def _with_ingestion_timestamp(df: DataFrame, run_timestamp: datetime) -> DataFrame:
-    return df.withColumn("ingestion_timestamp", F.lit(run_timestamp).cast("timestamp"))
+def _with_ingestion_timestamp(df, run_timestamp: datetime):
+    import polars as pl
 
-
-def _write_bronze_table(*, df: DataFrame, output_path: str) -> None:
-    (
-        df.write.format("delta")
-        .mode("overwrite")
-        .option("overwriteSchema", "true")
-        .save(output_path)
+    return df.with_columns(
+        pl.lit(run_timestamp).cast(pl.Datetime("us")).alias("ingestion_timestamp")
     )
+
+
+def _write_bronze_table(*, df, output_path: str) -> None:
+    df.write_delta(output_path, mode="overwrite")
