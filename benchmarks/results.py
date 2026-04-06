@@ -17,6 +17,7 @@ class BenchmarkResult:
     failure_type: str | None
     elapsed_seconds: float
     workload_exec_seconds: float | None
+    validation_seconds: float | None
     cold_start_seconds: float | None
     peak_memory_mb: float | None
     tmp_peak_mb: float | None
@@ -74,6 +75,7 @@ def build_sample_result(
         failure_type=None,
         elapsed_seconds=0.0,
         workload_exec_seconds=0.0,
+        validation_seconds=0.0,
         cold_start_seconds=0.0,
         peak_memory_mb=None,
         tmp_peak_mb=None,

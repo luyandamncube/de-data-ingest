@@ -30,6 +30,11 @@ def _cpu_user_seconds() -> float:
     )
 
 
+def _count_csv_rows(path: Path) -> int:
+    with path.open(encoding="utf-8") as handle:
+        return max(sum(1 for _ in handle) - 1, 0)
+
+
 def run(
     *,
     engine_name: str,
@@ -48,52 +53,67 @@ def run(
         raise FileNotFoundError(f"customers dataset not found: {customers_path}")
 
     run_timestamp = datetime.now(timezone.utc).replace(microsecond=0, tzinfo=None)
+    rows_in = _count_csv_rows(customers_path)
     output_path = Path("/tmp") / "benchmarks" / workload.id.lower() / f"attempt_{attempt}"
     shutil.rmtree(output_path, ignore_errors=True)
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
     cpu_start = _cpu_user_seconds()
-    start = time.perf_counter()
+    core_start = time.perf_counter()
 
     customers_df = (
         spark.read.option("header", True)
         .schema(BRONZE_CUSTOMERS_SCHEMA)
         .csv(str(customers_path))
     )
-    rows_in = customers_df.count()
+    customers_with_ts = customers_df.withColumn(
+        "ingestion_timestamp",
+        F.lit(run_timestamp).cast("timestamp"),
+    )
 
     write_start = time.perf_counter()
     (
-        customers_df.withColumn(
-            "ingestion_timestamp",
-            F.lit(run_timestamp).cast("timestamp"),
-        )
+        customers_with_ts.coalesce(1)
         .write.format("delta")
         .mode("overwrite")
-        .option("overwriteSchema", "true")
         .save(str(output_path))
     )
     delta_write_seconds = time.perf_counter() - write_start
 
+    core_elapsed_seconds = time.perf_counter() - core_start
+    cpu_user_seconds = _cpu_user_seconds() - cpu_start
+
     read_start = time.perf_counter()
     roundtrip_df = spark.read.format("delta").load(str(output_path))
-    rows_out = roundtrip_df.count()
-    distinct_timestamps = roundtrip_df.select("ingestion_timestamp").distinct().count()
+    validation_row = (
+        roundtrip_df.agg(
+            F.count("*").alias("row_count"),
+            F.min("ingestion_timestamp").alias("min_ingestion_timestamp"),
+            F.max("ingestion_timestamp").alias("max_ingestion_timestamp"),
+        ).collect()[0]
+    )
+    rows_out = validation_row["row_count"]
+    min_ingestion_timestamp = validation_row["min_ingestion_timestamp"]
+    max_ingestion_timestamp = validation_row["max_ingestion_timestamp"]
     delta_read_seconds = time.perf_counter() - read_start
 
-    elapsed_seconds = time.perf_counter() - start
-    cpu_user_seconds = _cpu_user_seconds() - cpu_start
+    validation_seconds = delta_read_seconds
     cpu_pct = (
-        (cpu_user_seconds / elapsed_seconds) * 100.0 if elapsed_seconds > 0 else None
+        (cpu_user_seconds / core_elapsed_seconds) * 100.0
+        if core_elapsed_seconds > 0
+        else None
     )
     output_file_count = len(list(output_path.glob("*.parquet")))
-    delta_roundtrip_ok = rows_in == rows_out and distinct_timestamps == 1
+    delta_roundtrip_ok = (
+        rows_in == rows_out and min_ingestion_timestamp == max_ingestion_timestamp
+    )
 
     return BenchmarkExecution(
         workload_id=workload.id,
         engine=engine_name,
-        elapsed_seconds=elapsed_seconds,
+        elapsed_seconds=core_elapsed_seconds,
         peak_memory_mb=_peak_memory_mb(),
+        validation_seconds=validation_seconds,
         rows_in=rows_in,
         rows_out=rows_out,
         cpu_user_seconds=cpu_user_seconds,
@@ -111,7 +131,8 @@ def run(
         artifacts={
             "input_path": str(customers_path),
             "output_path": str(output_path),
-            "distinct_ingestion_timestamps": distinct_timestamps,
+            "min_ingestion_timestamp": str(min_ingestion_timestamp),
+            "max_ingestion_timestamp": str(max_ingestion_timestamp),
             "implementation_ref": (
                 "benchmarks.workloads.bronze.brz_01_ingest_customers_raw:run"
             ),
