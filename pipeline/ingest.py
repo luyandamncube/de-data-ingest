@@ -60,8 +60,14 @@ def run_ingestion() -> None:
             run_timestamp=run_timestamp,
         )
 
-        # TODO: Implement BRZ_02 and BRZ_03 using the same run_timestamp:
-        #   - accounts.csv -> bronze/accounts
+        accounts_adapter = get_adapter(config.ingest.engines.accounts)
+        accounts_adapter.ingest_accounts(
+            input_path=config.input.accounts_path,
+            output_path=config.bronze_table_path("accounts"),
+            run_timestamp=run_timestamp,
+        )
+
+        # TODO: Implement BRZ_03 using the same run_timestamp:
         #   - transactions.jsonl -> bronze/transactions
     finally:
         for adapter in adapters.values():

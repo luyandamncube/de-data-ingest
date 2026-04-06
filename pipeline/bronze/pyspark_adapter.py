@@ -7,6 +7,7 @@ from pathlib import Path
 
 from pipeline.bronze.base import BronzeIngestAdapter
 from pipeline.config_loader import SparkConfig
+from pipeline.schemas import BRONZE_ACCOUNTS_SCHEMA
 from pipeline.schemas import BRONZE_CUSTOMERS_SCHEMA
 from pipeline.spark_utils import build_spark_session
 
@@ -34,6 +35,31 @@ class PySparkBronzeAdapter(BronzeIngestAdapter):
         )
         (
             customers_df.withColumn(
+                "ingestion_timestamp",
+                F.lit(run_timestamp).cast("timestamp"),
+            )
+            .write.format("delta")
+            .mode("overwrite")
+            .save(output_path)
+        )
+
+    def ingest_accounts(
+        self,
+        *,
+        input_path: str,
+        output_path: str,
+        run_timestamp: datetime,
+    ) -> None:
+        from pyspark.sql import functions as F
+
+        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+        accounts_df = (
+            self._spark.read.option("header", True)
+            .schema(BRONZE_ACCOUNTS_SCHEMA)
+            .csv(input_path)
+        )
+        (
+            accounts_df.withColumn(
                 "ingestion_timestamp",
                 F.lit(run_timestamp).cast("timestamp"),
             )

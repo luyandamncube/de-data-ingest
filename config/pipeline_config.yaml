@@ -53,7 +53,7 @@ spark:
 ingest:
   engines:
     customers: polars
-    accounts: pyspark_delta
+    accounts: polars
     transactions: pyspark_delta
 
 # ── DQ rules reference ────────────────────────────────────────

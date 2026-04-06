@@ -37,7 +37,7 @@ class SparkConfig:
 @dataclass(frozen=True, slots=True)
 class IngestEngineConfig:
     customers: str = "polars"
-    accounts: str = "pyspark_delta"
+    accounts: str = "polars"
     transactions: str = "pyspark_delta"
 
 
@@ -101,7 +101,7 @@ def load_config(config_path: str | None = None) -> PipelineConfig:
                 accounts=_string_with_default(
                     ingest_engines_section,
                     "accounts",
-                    "pyspark_delta",
+                    "polars",
                 ),
                 transactions=_string_with_default(
                     ingest_engines_section,
