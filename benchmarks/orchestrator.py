@@ -377,7 +377,7 @@ def run_docker_smoke(args: argparse.Namespace) -> int:
                     "--cpus=2",
                     "--read-only",
                     "--tmpfs",
-                    "/tmp:rw,size=512m",
+                    "/tmp:rw,exec,size=512m",
                     "-e",
                     "PYTHONDONTWRITEBYTECODE=1",
                     "-v",

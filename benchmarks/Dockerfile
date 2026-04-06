@@ -9,6 +9,9 @@ RUN curl https://clickhouse.com/ | sh \
     && mv ./clickhouse /usr/local/bin/clickhouse \
     && chmod +x /usr/local/bin/clickhouse
 
+COPY infrastructure/prewarm_delta_jars.py infrastructure/prewarm_delta_jars.py
+RUN python infrastructure/prewarm_delta_jars.py
+
 COPY benchmarks/ benchmarks/
 COPY pipeline/ pipeline/
 COPY config/ config/
