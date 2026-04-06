@@ -96,5 +96,7 @@ python -m benchmarks.orchestrator docker-smoke \
   Bronze/Silver/Gold implementation.
 - `BRZ_01` is the first real Bronze workload wired into the benchmark suite,
   currently implemented for `pyspark_delta`, `polars`, and `pyarrow_acero`.
+- `BRZ_02` is now wired into the benchmark suite for the same three engines so
+  `accounts.csv` can be compared on the same Bronze Delta contract.
 - Real benchmark value arrives incrementally as executable workloads land on the
   Bronze, Silver, and Gold branches.

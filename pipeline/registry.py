@@ -238,9 +238,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Ingest accounts.csv to Bronze",
         family="bronze_ingest",
         variant="accounts_csv_raw",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("pyspark_delta", "polars", "pyarrow_acero"),
         validation_gate="Bronze accounts Delta table created and readable",
         description="Raw accounts CSV ingest with explicit schema application.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "pyspark_delta": (
+                    "benchmarks.workloads.bronze."
+                    "brz_02_ingest_accounts_raw:run"
+                ),
+                "polars": (
+                    "benchmarks.workloads.bronze."
+                    "brz_02_ingest_accounts_raw_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.bronze."
+                    "brz_02_ingest_accounts_raw_pyarrow:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="BRZ_03",
