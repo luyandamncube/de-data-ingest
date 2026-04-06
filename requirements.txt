@@ -12,3 +12,6 @@
 #
 # Example:
 #   great-expectations==0.18.0
+numpy<2
+polars==1.35.2
+deltalake

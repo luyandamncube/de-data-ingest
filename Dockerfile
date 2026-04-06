@@ -17,6 +17,11 @@ RUN python infrastructure/prewarm_delta_jars.py
 COPY pipeline/ pipeline/
 COPY config/ config/
 
+# The local scorer harness mounts /data/output as a user-owned temp directory
+# while dropping all container capabilities. Running as UID/GID 1000 keeps the
+# submission image able to write into that mount under the harness contract.
+USER 1000:1000
+
 # Entry point — must run the complete pipeline end-to-end without interactive input.
 # The scoring system uses this CMD directly; do not require TTY or stdin.
 CMD ["python", "-m", "pipeline.run_all"]

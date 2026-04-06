@@ -69,7 +69,7 @@ def run(
 
     customers_df = pl.read_csv(
         customers_path,
-        schema_overrides=_polars_schema(),
+        schema=_polars_schema(),
     )
     customers_with_ts = customers_df.with_columns(
         pl.lit(run_timestamp).cast(pl.Datetime("us")).alias("ingestion_timestamp")
