@@ -7,6 +7,7 @@ from benchmarks.adapters.clickhouse_local import ClickHouseLocalAdapter
 from benchmarks.adapters.datafusion import DataFusionAdapter
 from benchmarks.adapters.duckdb import DuckDBAdapter
 from benchmarks.adapters.polars import PolarsAdapter
+from benchmarks.adapters.pyarrow_acero import PyArrowAceroAdapter
 from benchmarks.adapters.pyspark_delta import PySparkDeltaAdapter
 from benchmarks.adapters.simulated import SimulatedAdapter
 from pipeline.registry import SHORTLIST_ENGINES
@@ -27,4 +28,6 @@ def get_adapter(engine: str) -> EngineAdapter:
         return DuckDBAdapter()
     if engine == "clickhouse_local":
         return ClickHouseLocalAdapter()
+    if engine == "pyarrow_acero":
+        return PyArrowAceroAdapter()
     return SimulatedAdapter(engine)

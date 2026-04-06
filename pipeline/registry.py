@@ -169,6 +169,7 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
             "datafusion",
             "duckdb",
             "clickhouse_local",
+            "pyarrow_acero",
         ),
         validation_gate=(
             "Host orchestrator can execute a real engine-backed workload over "
@@ -191,6 +192,12 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
                     "benchmarks/sql/clickhouse/"
                     "bm_07_customers_aggregation.sql"
                 ),
+            },
+            engine_python_refs={
+                "pyarrow_acero": (
+                    "benchmarks.workloads.smoke."
+                    "bm_07_customers_pyarrow_aggregation:run"
+                )
             },
             common_sql_ref="benchmarks/sql/common/bm_07_customers_aggregation.sql",
         ),
