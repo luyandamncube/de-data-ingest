@@ -35,10 +35,23 @@ class SparkConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class IngestEngineConfig:
+    customers: str = "polars"
+    accounts: str = "pyspark_delta"
+    transactions: str = "pyspark_delta"
+
+
+@dataclass(frozen=True, slots=True)
+class IngestConfig:
+    engines: IngestEngineConfig
+
+
+@dataclass(frozen=True, slots=True)
 class PipelineConfig:
     input: InputConfig
     output: OutputConfig
     spark: SparkConfig
+    ingest: IngestConfig
 
     def bronze_table_path(self, table_name: str) -> str:
         return posixpath.join(self.output.bronze_path, table_name)
@@ -58,6 +71,8 @@ def load_config(config_path: str | None = None) -> PipelineConfig:
     input_section = _require_mapping(raw, "input")
     output_section = _require_mapping(raw, "output")
     spark_section = _require_mapping(raw, "spark")
+    ingest_section = _optional_mapping(raw, "ingest") or {}
+    ingest_engines_section = _optional_mapping(ingest_section, "engines") or {}
 
     return PipelineConfig(
         input=InputConfig(
@@ -76,6 +91,25 @@ def load_config(config_path: str | None = None) -> PipelineConfig:
             app_name=_require_string(spark_section, "app_name"),
             local_dir=_optional_string(spark_section, "local_dir"),
         ),
+        ingest=IngestConfig(
+            engines=IngestEngineConfig(
+                customers=_string_with_default(
+                    ingest_engines_section,
+                    "customers",
+                    "polars",
+                ),
+                accounts=_string_with_default(
+                    ingest_engines_section,
+                    "accounts",
+                    "pyspark_delta",
+                ),
+                transactions=_string_with_default(
+                    ingest_engines_section,
+                    "transactions",
+                    "pyspark_delta",
+                ),
+            )
+        ),
     )
 
 
@@ -86,10 +120,32 @@ def _require_mapping(data: dict[str, object], key: str) -> dict[str, object]:
     return value
 
 
+def _optional_mapping(data: dict[str, object], key: str) -> dict[str, object] | None:
+    value = data.get(key)
+    if value is None:
+        return None
+    if not isinstance(value, dict):
+        raise ValueError(f"config section '{key}' is not a mapping")
+    return value
+
+
 def _require_string(data: dict[str, object], key: str) -> str:
     value = data.get(key)
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"config value '{key}' is missing or not a non-empty string")
+    return value
+
+
+def _string_with_default(
+    data: dict[str, object],
+    key: str,
+    default: str,
+) -> str:
+    value = data.get(key)
+    if value is None:
+        return default
+    if not isinstance(value, str) or not value.strip():
+        raise ValueError(f"config value '{key}' is not a non-empty string")
     return value
 
 
