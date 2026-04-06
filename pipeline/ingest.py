@@ -25,14 +25,24 @@ Spark configuration tip:
   Configure Delta Lake using the builder pattern shown in the base image docs.
 """
 
+from __future__ import annotations
 
-def run_ingestion():
-    # TODO: Implement Bronze layer ingestion.
-    #
-    # Suggested steps:
-    #   1. Load pipeline_config.yaml to get input/output paths.
-    #   2. Initialise a SparkSession with Delta Lake support (local[2]).
-    #   3. Read accounts.csv → append ingestion_timestamp → write to bronze/accounts/.
-    #   4. Read transactions.jsonl → append ingestion_timestamp → write to bronze/transactions/.
-    #   5. Read customers.csv → append ingestion_timestamp → write to bronze/customers/.
-    pass
+from pipeline.config_loader import load_config
+from pipeline.spark_utils import build_spark_session
+
+
+def run_ingestion() -> None:
+    """Run the Bronze ingestion entrypoint."""
+
+    config = load_config()
+    spark = build_spark_session(config.spark)
+    try:
+        # TODO: Implement Bronze layer ingestion.
+        #
+        # Suggested steps:
+        #   1. Read the raw mounted inputs using explicit Bronze schemas.
+        #   2. Add a single run-level ingestion_timestamp across all sources.
+        #   3. Write accounts, transactions, and customers to Bronze Delta paths.
+        _ = (config, spark)
+    finally:
+        spark.stop()
