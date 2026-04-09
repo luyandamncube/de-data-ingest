@@ -27,7 +27,7 @@ class PySparkDeltaAdapter(EngineAdapter):
         return True
 
     def supported_families(self) -> tuple[str, ...]:
-        return ("docker_smoke",)
+        return ("docker_smoke", "bronze_ingest")
 
     def run(
         self,
@@ -239,9 +239,17 @@ class PySparkDeltaAdapter(EngineAdapter):
             .master("local[2]")
             .config("spark.ui.enabled", "false")
             .config("spark.sql.shuffle.partitions", "4")
-            .config("spark.default.parallelism", "4")
+            .config("spark.default.parallelism", "2")
             .config("spark.local.dir", "/tmp/spark-local")
             .config("spark.sql.session.timeZone", "UTC")
+            .config(
+                "spark.sql.extensions",
+                "io.delta.sql.DeltaSparkSessionExtension",
+            )
+            .config(
+                "spark.sql.catalog.spark_catalog",
+                "org.apache.spark.sql.delta.catalog.DeltaCatalog",
+            )
             .config("spark.driver.host", "127.0.0.1")
             .config("spark.driver.bindAddress", "127.0.0.1")
             .getOrCreate()

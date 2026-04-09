@@ -16,6 +16,7 @@ class BenchmarkExecution:
     engine: str
     elapsed_seconds: float
     peak_memory_mb: float | None
+    validation_seconds: float | None = None
     rows_in: int | None = None
     rows_out: int | None = None
     cpu_user_seconds: float | None = None

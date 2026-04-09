@@ -26,6 +26,7 @@ Right now, the Docker loop is real and supports:
 
 - `BM_06`: dummy orchestration validation
 - `BM_07`: real engine-backed aggregation over `customers.csv`
+- `BRZ_01`: PySpark Bronze customers ingest with Delta write/read validation
 
 That lets us validate both the container loop and a genuine engine-backed run
 before we implement real Bronze, Silver, or Gold workloads on their dedicated
@@ -93,5 +94,11 @@ python -m benchmarks.orchestrator docker-smoke \
   `pyspark_delta`, `polars`, `datafusion`, `duckdb`, `clickhouse_local`, and
   `pyarrow_acero`, but it is still only a smoke benchmark, not a
   Bronze/Silver/Gold implementation.
+- `BRZ_01` is the first real Bronze workload wired into the benchmark suite,
+  currently implemented for `pyspark_delta`, `polars`, and `pyarrow_acero`.
+- `BRZ_02` is now wired into the benchmark suite for the same three engines so
+  `accounts.csv` can be compared on the same Bronze Delta contract.
+- `BRZ_03` now has PySpark, Polars, and PyArrow benchmark paths so
+  `transactions.jsonl` can be compared on the raw nested Bronze contract.
 - Real benchmark value arrives incrementally as executable workloads land on the
   Bronze, Silver, and Gold branches.

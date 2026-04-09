@@ -47,6 +47,15 @@ spark:
   # a 512 MB tmpfs at /tmp — keep intermediate data small.
   # spark.local.dir: /tmp
 
+# ── Bronze engine routing ─────────────────────────────────────
+# Select the Bronze ingest adapter per source. This lets the pipeline
+# benchmark and swap engines without changing the scorer-facing entrypoint.
+ingest:
+  engines:
+    customers: polars
+    accounts: polars
+    transactions: polars
+
 # ── DQ rules reference ────────────────────────────────────────
 # Stage 2+: path to the DQ rules file. Your pipeline must read
 # DQ logic from this file rather than hardcoding it.

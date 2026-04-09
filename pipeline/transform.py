@@ -29,8 +29,15 @@ See output_schema_spec.md §8 for the full list of DQ flag values and their
 definitions.
 """
 
+from pathlib import Path
+
+from pipeline.config_loader import load_config
+
 
 def run_transformation():
+    config = load_config()
+    Path(config.output.silver_path).mkdir(parents=True, exist_ok=True)
+
     # TODO: Implement Silver layer transformation.
     #
     # Suggested steps:

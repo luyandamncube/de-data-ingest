@@ -57,6 +57,7 @@ def main() -> int:
         failure_type=None,
         elapsed_seconds=execution.elapsed_seconds,
         workload_exec_seconds=execution.elapsed_seconds,
+        validation_seconds=execution.validation_seconds,
         cold_start_seconds=0.0,
         peak_memory_mb=execution.peak_memory_mb,
         tmp_peak_mb=execution.tmp_peak_mb,
@@ -79,6 +80,7 @@ def main() -> int:
         json.dumps(result.as_dict(), indent=2, sort_keys=True),
         encoding="utf-8",
     )
+    result_path.chmod(0o666)
     return 0
 
 

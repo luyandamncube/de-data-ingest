@@ -210,9 +210,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Ingest customers.csv to Bronze",
         family="bronze_ingest",
         variant="customers_csv_raw",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("pyspark_delta", "polars", "pyarrow_acero"),
         validation_gate="Bronze customers Delta table created and readable",
         description="Raw customers CSV ingest with explicit schema application.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "pyspark_delta": (
+                    "benchmarks.workloads.bronze."
+                    "brz_01_ingest_customers_raw:run"
+                ),
+                "polars": (
+                    "benchmarks.workloads.bronze."
+                    "brz_01_ingest_customers_raw_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.bronze."
+                    "brz_01_ingest_customers_raw_pyarrow:run"
+                )
+            }
+        ),
     ),
     TrackingUnit(
         id="BRZ_02",
@@ -222,9 +238,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Ingest accounts.csv to Bronze",
         family="bronze_ingest",
         variant="accounts_csv_raw",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("pyspark_delta", "polars", "pyarrow_acero"),
         validation_gate="Bronze accounts Delta table created and readable",
         description="Raw accounts CSV ingest with explicit schema application.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "pyspark_delta": (
+                    "benchmarks.workloads.bronze."
+                    "brz_02_ingest_accounts_raw:run"
+                ),
+                "polars": (
+                    "benchmarks.workloads.bronze."
+                    "brz_02_ingest_accounts_raw_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.bronze."
+                    "brz_02_ingest_accounts_raw_pyarrow:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="BRZ_03",
@@ -234,9 +266,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Ingest transactions.jsonl to Bronze",
         family="bronze_ingest",
         variant="transactions_jsonl_raw",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("pyspark_delta", "polars", "pyarrow_acero"),
         validation_gate="Bronze transactions Delta table created and readable",
         description="Raw transaction JSONL ingest with nested schema application.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "pyspark_delta": (
+                    "benchmarks.workloads.bronze."
+                    "brz_03_ingest_transactions_raw:run"
+                ),
+                "polars": (
+                    "benchmarks.workloads.bronze."
+                    "brz_03_ingest_transactions_raw_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.bronze."
+                    "brz_03_ingest_transactions_raw_pyarrow:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="BRZ_04",

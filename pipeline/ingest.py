@@ -25,14 +25,65 @@ Spark configuration tip:
   Configure Delta Lake using the builder pattern shown in the base image docs.
 """
 
+from __future__ import annotations
 
-def run_ingestion():
-    # TODO: Implement Bronze layer ingestion.
-    #
-    # Suggested steps:
-    #   1. Load pipeline_config.yaml to get input/output paths.
-    #   2. Initialise a SparkSession with Delta Lake support (local[2]).
-    #   3. Read accounts.csv → append ingestion_timestamp → write to bronze/accounts/.
-    #   4. Read transactions.jsonl → append ingestion_timestamp → write to bronze/transactions/.
-    #   5. Read customers.csv → append ingestion_timestamp → write to bronze/customers/.
-    pass
+from datetime import datetime, timezone
+from pathlib import Path
+
+from pipeline.bronze.factory import build_bronze_adapter
+from pipeline.config_loader import load_config
+from pipeline.gates.bronze_validation import validate_bronze_outputs
+
+
+def run_ingestion() -> None:
+    """Run the Bronze ingestion entrypoint."""
+
+    config = load_config()
+    Path(config.output.bronze_path).mkdir(parents=True, exist_ok=True)
+    run_timestamp = _run_ingestion_timestamp()
+    adapters = {}
+
+    def get_adapter(engine_name: str):
+        adapter = adapters.get(engine_name)
+        if adapter is None:
+            adapter = build_bronze_adapter(
+                engine_name,
+                spark_config=config.spark,
+            )
+            adapters[engine_name] = adapter
+        return adapter
+
+    try:
+        customers_adapter = get_adapter(config.ingest.engines.customers)
+        customers_adapter.ingest_customers(
+            input_path=config.input.customers_path,
+            output_path=config.bronze_table_path("customers"),
+            run_timestamp=run_timestamp,
+        )
+
+        accounts_adapter = get_adapter(config.ingest.engines.accounts)
+        accounts_adapter.ingest_accounts(
+            input_path=config.input.accounts_path,
+            output_path=config.bronze_table_path("accounts"),
+            run_timestamp=run_timestamp,
+        )
+
+        transactions_adapter = get_adapter(config.ingest.engines.transactions)
+        transactions_adapter.ingest_transactions(
+            input_path=config.input.transactions_path,
+            output_path=config.bronze_table_path("transactions"),
+            run_timestamp=run_timestamp,
+        )
+        validate_bronze_outputs(
+            config=config,
+            run_timestamp=run_timestamp,
+        )
+    finally:
+        for adapter in adapters.values():
+            adapter.close()
+
+
+def _run_ingestion_timestamp() -> datetime:
+    """Return one UTC timestamp shared across the Bronze ingestion run."""
+
+    return datetime.now(timezone.utc).replace(microsecond=0, tzinfo=None)

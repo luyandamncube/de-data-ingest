@@ -6,6 +6,7 @@ import argparse
 from dataclasses import replace
 import json
 from pathlib import Path
+import re
 import statistics
 import subprocess
 import sys
@@ -19,6 +20,7 @@ from pipeline.registry import SHORTLIST_ENGINES, filter_manifest
 DEFAULT_BENCHMARK_IMAGE = "de-data-ingest-bench:test"
 DEFAULT_DOCKERFILE = "benchmarks/Dockerfile"
 DEFAULT_SMOKE_WORKLOAD = "BM_06"
+STATS_POLL_SECONDS = 1.0
 
 
 def normalise_csv_args(values: list[str] | None) -> list[str]:
@@ -121,6 +123,7 @@ def load_result(path: Path) -> BenchmarkResult:
         failure_type=payload.get("failure_type"),
         elapsed_seconds=payload["elapsed_seconds"],
         workload_exec_seconds=payload.get("workload_exec_seconds"),
+        validation_seconds=payload.get("validation_seconds"),
         cold_start_seconds=payload.get("cold_start_seconds"),
         peak_memory_mb=payload["peak_memory_mb"],
         tmp_peak_mb=payload.get("tmp_peak_mb"),
@@ -154,6 +157,66 @@ def inspect_image_size_mb(image: str) -> float | None:
     return size_bytes / (1024 * 1024)
 
 
+def parse_cpu_percent(value: str) -> float | None:
+    cleaned = value.strip().rstrip("%")
+    if not cleaned:
+        return None
+    try:
+        return float(cleaned)
+    except ValueError:
+        return None
+
+
+def parse_memory_usage_mb(value: str) -> float | None:
+    if "/" in value:
+        value = value.split("/", 1)[0]
+    match = re.search(r"([0-9]+(?:\.[0-9]+)?)\s*([KMGTP]i?B|B)", value.strip())
+    if not match:
+        return None
+
+    amount = float(match.group(1))
+    unit = match.group(2)
+    factors = {
+        "B": 1.0 / (1024 * 1024),
+        "KB": 1.0 / 1024,
+        "KiB": 1.0 / 1024,
+        "MB": 1.0,
+        "MiB": 1.0,
+        "GB": 1024.0,
+        "GiB": 1024.0,
+        "TB": 1024.0 * 1024.0,
+        "TiB": 1024.0 * 1024.0,
+        "PB": 1024.0 * 1024.0 * 1024.0,
+        "PiB": 1024.0 * 1024.0 * 1024.0,
+    }
+    return amount * factors[unit]
+
+
+def sample_container_stats(container_id: str) -> tuple[float | None, float | None]:
+    completed = subprocess.run(
+        [
+            "docker",
+            "stats",
+            "--no-stream",
+            "--format",
+            "{{.CPUPerc}}|{{.MemUsage}}",
+            container_id,
+        ],
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if completed.returncode != 0:
+        return None, None
+
+    line = completed.stdout.strip()
+    if not line or "|" not in line:
+        return None, None
+
+    cpu_raw, mem_raw = line.split("|", 1)
+    return parse_cpu_percent(cpu_raw), parse_memory_usage_mb(mem_raw)
+
+
 def classify_failure(return_code: int, *, timed_out: bool) -> str:
     if timed_out or return_code == 124:
         return "timeout"
@@ -184,6 +247,7 @@ def build_failure_result(
         failure_type=failure_type,
         elapsed_seconds=elapsed_seconds,
         workload_exec_seconds=None,
+        validation_seconds=None,
         cold_start_seconds=None,
         peak_memory_mb=None,
         tmp_peak_mb=None,
@@ -367,17 +431,20 @@ def run_docker_smoke(args: argparse.Namespace) -> int:
             for attempt in range(1, args.attempts + 1):
                 result_name = f"{engine}__{workload_id}__attempt_{attempt}.json"
                 result_path = results_dir / result_name
+                cidfile = results_dir / f"{engine}__{workload_id}__attempt_{attempt}.cid"
                 cmd = [
                     "docker",
                     "run",
                     "--rm",
+                    "--cidfile",
+                    str(cidfile),
                     "--network=none",
                     "--memory=2g",
                     "--memory-swap=2g",
                     "--cpus=2",
                     "--read-only",
                     "--tmpfs",
-                    "/tmp:rw,size=512m",
+                    "/tmp:rw,exec,size=512m",
                     "-e",
                     "PYTHONDONTWRITEBYTECODE=1",
                     "-v",
@@ -401,18 +468,60 @@ def run_docker_smoke(args: argparse.Namespace) -> int:
                 ]
                 start = time.perf_counter()
                 timed_out = False
+                cpu_samples: list[float] = []
+                mem_samples: list[float] = []
+                process = subprocess.Popen(
+                    cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    text=True,
+                )
                 try:
-                    completed = subprocess.run(
-                        cmd,
-                        check=False,
-                        capture_output=True,
-                        text=True,
-                        timeout=args.timeout_seconds,
+                    container_id: str | None = None
+                    while True:
+                        return_code = process.poll()
+                        if return_code is not None:
+                            break
+
+                        elapsed_so_far = time.perf_counter() - start
+                        if elapsed_so_far > args.timeout_seconds:
+                            timed_out = True
+                            if cidfile.exists():
+                                container_id = cidfile.read_text(encoding="utf-8").strip()
+                                subprocess.run(
+                                    ["docker", "rm", "-f", container_id],
+                                    check=False,
+                                    capture_output=True,
+                                    text=True,
+                                )
+                            process.kill()
+                            break
+
+                        if container_id is None and cidfile.exists():
+                            container_id = cidfile.read_text(encoding="utf-8").strip()
+
+                        if container_id:
+                            cpu_pct, mem_mb = sample_container_stats(container_id)
+                            if cpu_pct is not None:
+                                cpu_samples.append(cpu_pct)
+                            if mem_mb is not None:
+                                mem_samples.append(mem_mb)
+
+                        time.sleep(STATS_POLL_SECONDS)
+
+                    stdout, stderr = process.communicate(timeout=5)
+                    completed = subprocess.CompletedProcess(
+                        process.args,
+                        process.returncode,
+                        stdout,
+                        stderr,
                     )
                 except subprocess.TimeoutExpired:
                     timed_out = True
                     completed = None
                 elapsed_seconds = time.perf_counter() - start
+                if cidfile.exists():
+                    cidfile.unlink(missing_ok=True)
 
                 if timed_out:
                     results.append(
@@ -432,21 +541,52 @@ def run_docker_smoke(args: argparse.Namespace) -> int:
                 assert completed is not None
                 if completed.returncode == 0 and result_path.exists():
                     result = load_result(result_path)
+                    avg_cpu_pct = (
+                        statistics.fmean(cpu_samples) if cpu_samples else result.cpu_pct
+                    )
+                    peak_mem_mb = max(mem_samples) if mem_samples else result.peak_memory_mb
+                    cpu_seconds = (
+                        elapsed_seconds * (avg_cpu_pct / 100.0)
+                        if avg_cpu_pct is not None
+                        else result.cpu_user_seconds
+                    )
+                    validation_seconds = result.validation_seconds or 0.0
                     cold_start_seconds = (
-                        elapsed_seconds - result.workload_exec_seconds
+                        elapsed_seconds
+                        - result.workload_exec_seconds
+                        - validation_seconds
                         if result.workload_exec_seconds is not None
                         else None
                     )
-                    results.append(
-                        replace(
-                            result,
-                            exit_code=0,
-                            failure_type=None,
-                            elapsed_seconds=elapsed_seconds,
-                            cold_start_seconds=cold_start_seconds,
-                            image_size_mb=image_size_mb,
-                        )
+                    final_result = replace(
+                        result,
+                        exit_code=0,
+                        failure_type=None,
+                        elapsed_seconds=elapsed_seconds,
+                        validation_seconds=result.validation_seconds,
+                        cold_start_seconds=cold_start_seconds,
+                        peak_memory_mb=peak_mem_mb,
+                        cpu_user_seconds=cpu_seconds,
+                        cpu_pct=avg_cpu_pct,
+                        image_size_mb=image_size_mb,
                     )
+                    result_payload = json.dumps(
+                        final_result.as_dict(),
+                        indent=2,
+                        sort_keys=True,
+                    )
+                    try:
+                        result_path.write_text(
+                            result_payload,
+                            encoding="utf-8",
+                        )
+                    except PermissionError:
+                        result_path.unlink(missing_ok=True)
+                        result_path.write_text(
+                            result_payload,
+                            encoding="utf-8",
+                        )
+                    results.append(final_result)
                     continue
 
                 stderr = (completed.stderr or "").strip()
