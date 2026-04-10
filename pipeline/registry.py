@@ -318,7 +318,7 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Standardise customers types and date formats",
         family="silver_standardisation",
         variant="customers_cast_dates",
-        candidate_engines=("polars",),
+        candidate_engines=("polars", "pyarrow_acero"),
         validation_gate="Customers Silver output has expected types",
         description="Type-cast and date-normalise customers data.",
         implementations=ImplementationBundle(
@@ -326,6 +326,10 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
                 "polars": (
                     "benchmarks.workloads.silver."
                     "slv_01_customers_standardise_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.silver."
+                    "slv_01_customers_standardise_pyarrow:run"
                 ),
             }
         ),
