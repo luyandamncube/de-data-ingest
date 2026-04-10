@@ -626,9 +626,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Generate stable surrogate keys",
         family="gold_key_generation",
         variant="stable_surrogate_keys",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="Gold surrogate keys are non-null and stable",
         description="Generate stable surrogate keys for Gold tables.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.gold."
+                    "gld_04_stable_surrogate_keys_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.gold."
+                    "gld_04_stable_surrogate_keys_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.gold."
+                    "gld_04_stable_surrogate_keys_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="CTR_01",
