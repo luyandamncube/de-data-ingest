@@ -542,9 +542,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Build dim_customers",
         family="gold_dimension_build",
         variant="dim_customers",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="dim_customers matches required Gold schema",
         description="Build customer dimension output.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.gold."
+                    "gld_01_dim_customers_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.gold."
+                    "gld_01_dim_customers_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.gold."
+                    "gld_01_dim_customers_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="GLD_02",
@@ -554,9 +570,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Build dim_accounts",
         family="gold_dimension_build",
         variant="dim_accounts",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="dim_accounts matches required Gold schema",
         description="Build account dimension output.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.gold."
+                    "gld_02_dim_accounts_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.gold."
+                    "gld_02_dim_accounts_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.gold."
+                    "gld_02_dim_accounts_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="GLD_03",
@@ -566,9 +598,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Build fact_transactions",
         family="gold_fact_build",
         variant="fact_transactions",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="fact_transactions matches required Gold schema",
         description="Build transaction fact output.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.gold."
+                    "gld_03_fact_transactions_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.gold."
+                    "gld_03_fact_transactions_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.gold."
+                    "gld_03_fact_transactions_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="GLD_04",
@@ -578,9 +626,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Generate stable surrogate keys",
         family="gold_key_generation",
         variant="stable_surrogate_keys",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="Gold surrogate keys are non-null and stable",
         description="Generate stable surrogate keys for Gold tables.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.gold."
+                    "gld_04_stable_surrogate_keys_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.gold."
+                    "gld_04_stable_surrogate_keys_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.gold."
+                    "gld_04_stable_surrogate_keys_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="CTR_01",
