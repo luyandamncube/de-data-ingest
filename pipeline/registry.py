@@ -374,9 +374,17 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Standardise transactions types and date formats",
         family="silver_standardisation",
         variant="transactions_parse_standardise",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars",),
         validation_gate="Transactions Silver output has expected types and timestamp fields",
         description="Parse transactions, standardise currency, amount, and timestamps.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.silver."
+                    "slv_03_transactions_standardise_polars:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="SLV_04",
