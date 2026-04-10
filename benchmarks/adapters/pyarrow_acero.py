@@ -23,7 +23,12 @@ class PyArrowAceroAdapter(EngineAdapter):
         return True
 
     def supported_families(self) -> tuple[str, ...]:
-        return ("docker_smoke", "bronze_ingest", "silver_standardisation")
+        return (
+            "docker_smoke",
+            "bronze_ingest",
+            "silver_standardisation",
+            "silver_dedup",
+        )
 
     def run(
         self,

@@ -402,7 +402,7 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Deduplicate customers on primary key",
         family="silver_dedup",
         variant="customers_pk",
-        candidate_engines=("polars",),
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="Customers Silver output contains unique customer_id values",
         description="Deduplicate customers on natural key.",
         implementations=ImplementationBundle(
@@ -410,6 +410,14 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
                 "polars": (
                     "benchmarks.workloads.silver."
                     "slv_04_customers_dedup_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.silver."
+                    "slv_04_customers_dedup_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.silver."
+                    "slv_04_customers_dedup_pyspark:run"
                 ),
             }
         ),
