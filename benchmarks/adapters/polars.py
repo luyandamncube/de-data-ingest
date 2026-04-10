@@ -25,7 +25,7 @@ class PolarsAdapter(EngineAdapter):
         return True
 
     def supported_families(self) -> tuple[str, ...]:
-        return ("docker_smoke", "bronze_ingest")
+        return ("docker_smoke", "bronze_ingest", "silver_standardisation")
 
     def run(
         self,
