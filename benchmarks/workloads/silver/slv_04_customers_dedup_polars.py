@@ -86,7 +86,7 @@ def run(
 
     read_start = time.perf_counter()
     deduped_table = DeltaTable(str(deduped_path))
-    deduped_files = _active_file_uris(deduped_table, deduped_path)
+    deduped_files = active_file_uris(deduped_table, deduped_path)
     validation_row = (
         pl.scan_parquet(deduped_files)
         .select(
