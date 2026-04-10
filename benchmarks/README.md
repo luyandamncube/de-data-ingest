@@ -104,7 +104,8 @@ python -m benchmarks.orchestrator docker-smoke \
   Bronze Delta to Silver type/date standardisation.
 - `SLV_02` now has Polars, PyArrow, and PySpark benchmark paths for accounts
   Bronze Delta to Silver type/date standardisation.
-- `SLV_03` now has a first Polars benchmark path for transactions Bronze Delta
-  to Silver parsing, timestamp materialisation, and type standardisation.
+- `SLV_03` now has Polars, PyArrow, and PySpark benchmark paths for
+  transactions Bronze Delta to Silver parsing, timestamp materialisation, and
+  type standardisation.
 - Real benchmark value arrives incrementally as executable workloads land on the
   Bronze, Silver, and Gold branches.

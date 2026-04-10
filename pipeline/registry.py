@@ -374,7 +374,7 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Standardise transactions types and date formats",
         family="silver_standardisation",
         variant="transactions_parse_standardise",
-        candidate_engines=("polars",),
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="Transactions Silver output has expected types and timestamp fields",
         description="Parse transactions, standardise currency, amount, and timestamps.",
         implementations=ImplementationBundle(
@@ -382,6 +382,14 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
                 "polars": (
                     "benchmarks.workloads.silver."
                     "slv_03_transactions_standardise_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.silver."
+                    "slv_03_transactions_standardise_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.silver."
+                    "slv_03_transactions_standardise_pyspark:run"
                 ),
             }
         ),
