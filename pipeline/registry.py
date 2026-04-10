@@ -570,9 +570,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Build dim_accounts",
         family="gold_dimension_build",
         variant="dim_accounts",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="dim_accounts matches required Gold schema",
         description="Build account dimension output.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.gold."
+                    "gld_02_dim_accounts_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.gold."
+                    "gld_02_dim_accounts_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.gold."
+                    "gld_02_dim_accounts_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="GLD_03",
