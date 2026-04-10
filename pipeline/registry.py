@@ -402,9 +402,17 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Deduplicate customers on primary key",
         family="silver_dedup",
         variant="customers_pk",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars",),
         validation_gate="Customers Silver output contains unique customer_id values",
         description="Deduplicate customers on natural key.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.silver."
+                    "slv_04_customers_dedup_polars:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="SLV_05",

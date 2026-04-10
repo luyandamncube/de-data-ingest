@@ -107,5 +107,7 @@ python -m benchmarks.orchestrator docker-smoke \
 - `SLV_03` now has Polars, PyArrow, and PySpark benchmark paths for
   transactions Bronze Delta to Silver parsing, timestamp materialisation, and
   type standardisation.
+- `SLV_04` now has a first Polars benchmark path for customer-key dedup over a
+  duplicate-injected Silver-like fixture.
 - Real benchmark value arrives incrementally as executable workloads land on the
   Bronze, Silver, and Gold branches.
