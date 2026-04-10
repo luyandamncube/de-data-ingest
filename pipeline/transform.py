@@ -66,7 +66,7 @@ def run_transformation():
             output_path=config.silver_table_path("transactions"),
         )
 
-        # TODO: Implement SLV_04+ using the same adapter shape.
+        # TODO: Implement SLV_05+ using the same adapter shape.
     finally:
         for adapter in adapters.values():
             adapter.close()

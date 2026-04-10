@@ -55,6 +55,15 @@ class PolarsSilverAdapter(SilverTransformAdapter):
                     pl.col("ingestion_timestamp").cast(pl.Datetime("us")),
                 ]
             )
+            .sort(
+                ["customer_id", "ingestion_timestamp"],
+                descending=[False, True],
+            )
+            .unique(
+                subset=["customer_id"],
+                keep="first",
+                maintain_order=True,
+            )
             .collect()
         )
         customers_df.write_delta(str(output_table_path), mode="overwrite")
