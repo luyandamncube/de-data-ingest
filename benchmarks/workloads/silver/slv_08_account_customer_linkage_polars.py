@@ -81,7 +81,10 @@ def run(
 
     customers_lf = (
         pl.scan_parquet(customer_files)
-        .select(pl.col("customer_id").alias("linked_customer_id"))
+        .select(
+            pl.col("customer_id").alias("linked_customer_id"),
+            pl.lit(True).alias("customer_match"),
+        )
     )
 
     linked_df = (
@@ -93,13 +96,12 @@ def run(
             how="left",
         )
         .with_columns(
-            pl.col("linked_customer_id").is_not_null().alias("link_resolved"),
+            pl.col("customer_match").fill_null(False).alias("link_resolved"),
             pl.col("customer_ref").alias("customer_id"),
         )
-        .drop("customer_ref", "linked_customer_id")
+        .drop("customer_ref", "customer_match")
         .collect()
     )
-
     write_start = time.perf_counter()
     linked_df.write_delta(str(linked_output_path), mode="overwrite")
     delta_write_seconds = time.perf_counter() - write_start
