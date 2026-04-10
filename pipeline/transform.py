@@ -1,20 +1,21 @@
 """
 Silver layer: Clean and conform Bronze tables into validated Silver Delta tables.
+
+Input paths (Bronze layer output — read these, do not modify):
+  /data/output/bronze/accounts/
+  /data/output/bronze/transactions/
+  /data/output/bronze/customers/
+
+Output paths (your pipeline must create these directories):
+  /data/output/silver/accounts/
+  /data/output/silver/transactions/
+  /data/output/silver/customers/
 """
 
 from pathlib import Path
 
-from deltalake import DeltaTable
-import polars as pl
-
 from pipeline.config_loader import load_config
 from pipeline.silver.factory import build_silver_adapter
-
-
-def _active_file_uris(delta_table: DeltaTable, table_path: Path) -> list[str]:
-    if hasattr(delta_table, "file_uris"):
-        return list(delta_table.file_uris())
-    return [str(table_path / relative_path) for relative_path in delta_table.files()]
 
 
 def _validate_account_customer_linkage(
@@ -22,14 +23,24 @@ def _validate_account_customer_linkage(
     customers_path: str,
     accounts_path: str,
 ) -> None:
+    from pathlib import Path
+
+    from deltalake import DeltaTable
+    import polars as pl
+
+    def active_file_uris(delta_table: DeltaTable, table_path: Path) -> list[str]:
+        if hasattr(delta_table, "file_uris"):
+            return list(delta_table.file_uris())
+        return [str(table_path / relative_path) for relative_path in delta_table.files()]
+
     customers_table_path = Path(customers_path)
     accounts_table_path = Path(accounts_path)
 
     customers_table = DeltaTable(str(customers_table_path))
     accounts_table = DeltaTable(str(accounts_table_path))
 
-    customer_files = _active_file_uris(customers_table, customers_table_path)
-    account_files = _active_file_uris(accounts_table, accounts_table_path)
+    customer_files = active_file_uris(customers_table, customers_table_path)
+    account_files = active_file_uris(accounts_table, accounts_table_path)
 
     unmatched_count = (
         pl.scan_parquet(account_files)
@@ -48,7 +59,8 @@ def _validate_account_customer_linkage(
 
     if unmatched_count:
         raise ValueError(
-            f"silver linkage validation failed: {unmatched_count} account rows do not match a customer_id"
+            "silver linkage validation failed: "
+            f"{unmatched_count} account rows do not match a customer_id"
         )
 
 
@@ -87,7 +99,8 @@ def run_transformation():
             "input_path": config.bronze_table_path("transactions"),
             "output_path": config.silver_table_path("transactions"),
         }
-        if config.silver.engines.transactions == "polars":
+
+        if getattr(transactions_adapter, "engine_name", None) == "polars":
             transaction_kwargs["accounts_input_path"] = config.silver_table_path(
                 "accounts"
             )

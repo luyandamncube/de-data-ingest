@@ -18,9 +18,9 @@ def _active_file_uris(delta_table: DeltaTable, table_path: Path) -> list[str]:
 def _scan_delta_table(table_path: Path):
     import polars as pl
 
-    table = DeltaTable(str(table_path))
-    files = _active_file_uris(table, table_path)
-    scan = pl.scan_parquet(files)
+    delta_table = DeltaTable(str(table_path))
+    data_files = _active_file_uris(delta_table, table_path)
+    scan = pl.scan_parquet(data_files)
     schema_names = set(scan.collect_schema().names())
     return scan, schema_names
 
@@ -231,7 +231,9 @@ class PolarsSilverAdapter(SilverTransformAdapter):
             bronze_scan
             .with_columns(
                 [
-                    pl.col("transaction_date").cast(pl.String).alias("_raw_transaction_date"),
+                    pl.col("transaction_date").cast(pl.String).alias(
+                        "_raw_transaction_date"
+                    ),
                     pl.col("currency").cast(pl.String).alias("_raw_currency"),
                     (pl.len().over("transaction_id") > 1).alias("_is_duplicate_group"),
                 ]
@@ -304,11 +306,21 @@ class PolarsSilverAdapter(SilverTransformAdapter):
                         .str.strip_chars()
                         .str.to_lowercase()
                         .is_in(["r", "rands", "zar", "710"])
-                        & (pl.col("_raw_currency").cast(pl.String).str.strip_chars() != "ZAR")
+                        & (
+                            pl.col("_raw_currency")
+                            .cast(pl.String)
+                            .str.strip_chars()
+                            != "ZAR"
+                        )
                     ).alias("_is_currency_variant"),
                     (
                         pl.col("_raw_transaction_date").is_not_null()
-                        & (pl.col("_raw_transaction_date").cast(pl.String).str.strip_chars() != "")
+                        & (
+                            pl.col("_raw_transaction_date")
+                            .cast(pl.String)
+                            .str.strip_chars()
+                            != ""
+                        )
                         & pl.col("transaction_date").is_null()
                     ).alias("_has_date_format_issue"),
                 ]
