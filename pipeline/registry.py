@@ -346,7 +346,7 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Standardise accounts types and date formats",
         family="silver_standardisation",
         variant="accounts_cast_dates",
-        candidate_engines=("polars", "pyspark_delta"),
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="Accounts Silver output has expected types",
         description="Type-cast and date-normalise accounts data.",
         implementations=ImplementationBundle(
@@ -354,6 +354,10 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
                 "polars": (
                     "benchmarks.workloads.silver."
                     "slv_02_accounts_standardise_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.silver."
+                    "slv_02_accounts_standardise_pyarrow:run"
                 ),
                 "pyspark_delta": (
                     "benchmarks.workloads.silver."
