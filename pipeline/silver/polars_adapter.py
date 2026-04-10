@@ -102,3 +102,77 @@ class PolarsSilverAdapter(SilverTransformAdapter):
             .collect()
         )
         accounts_df.write_delta(str(output_table_path), mode="overwrite")
+
+    def transform_transactions(
+        self,
+        *,
+        input_path: str,
+        output_path: str,
+    ) -> None:
+        import polars as pl
+
+        input_table_path = Path(input_path)
+        output_table_path = Path(output_path)
+        output_table_path.parent.mkdir(parents=True, exist_ok=True)
+
+        bronze_table = DeltaTable(str(input_table_path))
+        bronze_files = _active_file_uris(bronze_table, input_table_path)
+        transaction_timestamp_expr = (
+            pl.concat_str(
+                [
+                    pl.col("transaction_date").cast(pl.String),
+                    pl.lit(" "),
+                    pl.col("transaction_time").cast(pl.String),
+                ]
+            )
+            .str.strptime(pl.Datetime("us"), "%Y-%m-%d %H:%M:%S", strict=False)
+            .alias("transaction_timestamp")
+        )
+        transactions_df = (
+            pl.scan_parquet(bronze_files)
+            .select(
+                [
+                    pl.col("transaction_id").cast(pl.String),
+                    pl.col("account_id").cast(pl.String),
+                    pl.col("transaction_date").cast(pl.String).str.strptime(
+                        pl.Date,
+                        "%Y-%m-%d",
+                        strict=False,
+                    ),
+                    pl.col("transaction_time").cast(pl.String),
+                    transaction_timestamp_expr,
+                    pl.col("transaction_type").cast(pl.String),
+                    pl.col("merchant_category").cast(pl.String),
+                    pl.col("merchant_subcategory").cast(pl.String),
+                    pl.col("amount").cast(pl.Decimal(18, 2), strict=False),
+                    pl.col("currency").cast(pl.String).str.to_uppercase(),
+                    pl.col("channel").cast(pl.String),
+                    pl.col("location").struct.field("province").cast(pl.String).alias(
+                        "province"
+                    ),
+                    pl.col("location").struct.field("city").cast(pl.String).alias(
+                        "city"
+                    ),
+                    pl.col("location")
+                    .struct.field("coordinates")
+                    .cast(pl.String)
+                    .alias("coordinates"),
+                    pl.col("metadata")
+                    .struct.field("device_id")
+                    .cast(pl.String)
+                    .alias("device_id"),
+                    pl.col("metadata")
+                    .struct.field("session_id")
+                    .cast(pl.String)
+                    .alias("session_id"),
+                    pl.col("metadata")
+                    .struct.field("retry_flag")
+                    .cast(pl.Boolean)
+                    .alias("retry_flag"),
+                    pl.lit(None, dtype=pl.String).alias("dq_flag"),
+                    pl.col("ingestion_timestamp").cast(pl.Datetime("us")),
+                ]
+            )
+            .collect()
+        )
+        transactions_df.write_delta(str(output_table_path), mode="overwrite")
