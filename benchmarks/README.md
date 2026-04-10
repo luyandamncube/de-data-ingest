@@ -102,5 +102,7 @@ python -m benchmarks.orchestrator docker-smoke \
   `transactions.jsonl` can be compared on the raw nested Bronze contract.
 - `SLV_01` now has Polars, PyArrow, and PySpark benchmark paths for customers
   Bronze Delta to Silver type/date standardisation.
+- `SLV_02` now has a Polars benchmark path for accounts Bronze Delta to Silver
+  type/date standardisation.
 - Real benchmark value arrives incrementally as executable workloads land on the
   Bronze, Silver, and Gold branches.

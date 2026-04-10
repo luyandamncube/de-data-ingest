@@ -54,7 +54,13 @@ def run_transformation():
             output_path=config.silver_table_path("customers"),
         )
 
-        # TODO: Implement SLV_02 / SLV_03 / SLV_04+ using the same adapter shape.
+        accounts_adapter = get_adapter(config.silver.engines.accounts)
+        accounts_adapter.transform_accounts(
+            input_path=config.bronze_table_path("accounts"),
+            output_path=config.silver_table_path("accounts"),
+        )
+
+        # TODO: Implement SLV_03 / SLV_04+ using the same adapter shape.
     finally:
         for adapter in adapters.values():
             adapter.close()

@@ -20,5 +20,14 @@ class SilverTransformAdapter(ABC):
     ) -> None:
         """Transform bronze/customers into silver/customers."""
 
+    @abstractmethod
+    def transform_accounts(
+        self,
+        *,
+        input_path: str,
+        output_path: str,
+    ) -> None:
+        """Transform bronze/accounts into silver/accounts."""
+
     def close(self) -> None:
         """Release engine resources if needed."""

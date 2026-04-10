@@ -346,9 +346,17 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Standardise accounts types and date formats",
         family="silver_standardisation",
         variant="accounts_cast_dates",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars",),
         validation_gate="Accounts Silver output has expected types",
         description="Type-cast and date-normalise accounts data.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.silver."
+                    "slv_02_accounts_standardise_polars:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="SLV_03",
