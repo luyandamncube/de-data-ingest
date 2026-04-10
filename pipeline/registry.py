@@ -486,9 +486,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Enforce standard currency representation",
         family="silver_standardisation",
         variant="currency_standardise",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="Transactions Silver output uses canonical currency representation",
         description="Standardise currency values to ZAR.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.silver."
+                    "slv_07_transactions_currency_standardise_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.silver."
+                    "slv_07_transactions_currency_standardise_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.silver."
+                    "slv_07_transactions_currency_standardise_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="SLV_08",
