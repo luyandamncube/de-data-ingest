@@ -598,9 +598,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Build fact_transactions",
         family="gold_fact_build",
         variant="fact_transactions",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="fact_transactions matches required Gold schema",
         description="Build transaction fact output.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.gold."
+                    "gld_03_fact_transactions_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.gold."
+                    "gld_03_fact_transactions_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.gold."
+                    "gld_03_fact_transactions_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="GLD_04",

@@ -32,6 +32,7 @@ class PolarsAdapter(EngineAdapter):
             "silver_dedup",
             "silver_linkage",
             "gold_dimension_build",
+            "gold_fact_build",
         )
 
     def run(
