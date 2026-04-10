@@ -542,9 +542,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Build dim_customers",
         family="gold_dimension_build",
         variant="dim_customers",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="dim_customers matches required Gold schema",
         description="Build customer dimension output.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.gold."
+                    "gld_01_dim_customers_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.gold."
+                    "gld_01_dim_customers_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.gold."
+                    "gld_01_dim_customers_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="GLD_02",
