@@ -514,9 +514,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Resolve account-to-customer linkage",
         family="silver_linkage",
         variant="account_customer_linkage",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="Accounts link cleanly to customers on the Silver path",
         description="Resolve account-to-customer linkage before Gold joins.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.silver."
+                    "slv_08_account_customer_linkage_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.silver."
+                    "slv_08_account_customer_linkage_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.silver."
+                    "slv_08_account_customer_linkage_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="GLD_01",
