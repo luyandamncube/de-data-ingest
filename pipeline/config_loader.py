@@ -47,11 +47,24 @@ class IngestConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class SilverEngineConfig:
+    customers: str = "polars"
+    accounts: str = "polars"
+    transactions: str = "polars"
+
+
+@dataclass(frozen=True, slots=True)
+class SilverConfig:
+    engines: SilverEngineConfig
+
+
+@dataclass(frozen=True, slots=True)
 class PipelineConfig:
     input: InputConfig
     output: OutputConfig
     spark: SparkConfig
     ingest: IngestConfig
+    silver: SilverConfig
 
     def bronze_table_path(self, table_name: str) -> str:
         return posixpath.join(self.output.bronze_path, table_name)
@@ -73,6 +86,8 @@ def load_config(config_path: str | None = None) -> PipelineConfig:
     spark_section = _require_mapping(raw, "spark")
     ingest_section = _optional_mapping(raw, "ingest") or {}
     ingest_engines_section = _optional_mapping(ingest_section, "engines") or {}
+    silver_section = _optional_mapping(raw, "silver") or {}
+    silver_engines_section = _optional_mapping(silver_section, "engines") or {}
 
     return PipelineConfig(
         input=InputConfig(
@@ -107,6 +122,25 @@ def load_config(config_path: str | None = None) -> PipelineConfig:
                     ingest_engines_section,
                     "transactions",
                     "pyspark_delta",
+                ),
+            )
+        ),
+        silver=SilverConfig(
+            engines=SilverEngineConfig(
+                customers=_string_with_default(
+                    silver_engines_section,
+                    "customers",
+                    "polars",
+                ),
+                accounts=_string_with_default(
+                    silver_engines_section,
+                    "accounts",
+                    "polars",
+                ),
+                transactions=_string_with_default(
+                    silver_engines_section,
+                    "transactions",
+                    "polars",
                 ),
             )
         ),

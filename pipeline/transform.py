@@ -32,19 +32,29 @@ definitions.
 from pathlib import Path
 
 from pipeline.config_loader import load_config
+from pipeline.silver.factory import build_silver_adapter
 
 
 def run_transformation():
     config = load_config()
     Path(config.output.silver_path).mkdir(parents=True, exist_ok=True)
+    adapters = {}
 
-    # TODO: Implement Silver layer transformation.
-    #
-    # Suggested steps:
-    #   1. Load pipeline_config.yaml to get input/output paths.
-    #   2. Initialise (or reuse) SparkSession.
-    #   3. Read each Bronze table.
-    #   4. Deduplicate, type-cast, and standardise each table.
-    #   5. Apply DQ flagging to the transactions table.
-    #   6. Write cleaned tables to silver/.
-    pass
+    def get_adapter(engine_name: str):
+        adapter = adapters.get(engine_name)
+        if adapter is None:
+            adapter = build_silver_adapter(engine_name)
+            adapters[engine_name] = adapter
+        return adapter
+
+    try:
+        customers_adapter = get_adapter(config.silver.engines.customers)
+        customers_adapter.transform_customers(
+            input_path=config.bronze_table_path("customers"),
+            output_path=config.silver_table_path("customers"),
+        )
+
+        # TODO: Implement SLV_02 / SLV_03 / SLV_04+ using the same adapter shape.
+    finally:
+        for adapter in adapters.values():
+            adapter.close()

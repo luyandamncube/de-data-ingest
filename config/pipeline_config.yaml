@@ -56,6 +56,15 @@ ingest:
     accounts: polars
     transactions: polars
 
+# ── Silver engine routing ─────────────────────────────────────
+# Select the Silver transform adapter per table. Start with Polars for the
+# lightweight Stage 1 standardisation workloads and revisit per benchmark.
+silver:
+  engines:
+    customers: polars
+    accounts: polars
+    transactions: polars
+
 # ── DQ rules reference ────────────────────────────────────────
 # Stage 2+: path to the DQ rules file. Your pipeline must read
 # DQ logic from this file rather than hardcoding it.
