@@ -458,9 +458,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Deduplicate transactions on primary key",
         family="silver_dedup",
         variant="transactions_pk",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="Transactions Silver output contains unique transaction_id values",
         description="Deduplicate transactions on natural key.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.silver."
+                    "slv_06_transactions_dedup_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.silver."
+                    "slv_06_transactions_dedup_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.silver."
+                    "slv_06_transactions_dedup_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="SLV_07",
