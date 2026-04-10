@@ -318,9 +318,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Standardise customers types and date formats",
         family="silver_standardisation",
         variant="customers_cast_dates",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="Customers Silver output has expected types",
         description="Type-cast and date-normalise customers data.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.silver."
+                    "slv_01_customers_standardise_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.silver."
+                    "slv_01_customers_standardise_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.silver."
+                    "slv_01_customers_standardise_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="SLV_02",
@@ -330,9 +346,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Standardise accounts types and date formats",
         family="silver_standardisation",
         variant="accounts_cast_dates",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="Accounts Silver output has expected types",
         description="Type-cast and date-normalise accounts data.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.silver."
+                    "slv_02_accounts_standardise_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.silver."
+                    "slv_02_accounts_standardise_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.silver."
+                    "slv_02_accounts_standardise_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="SLV_03",
@@ -342,9 +374,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Standardise transactions types and date formats",
         family="silver_standardisation",
         variant="transactions_parse_standardise",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="Transactions Silver output has expected types and timestamp fields",
         description="Parse transactions, standardise currency, amount, and timestamps.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.silver."
+                    "slv_03_transactions_standardise_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.silver."
+                    "slv_03_transactions_standardise_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.silver."
+                    "slv_03_transactions_standardise_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="SLV_04",
@@ -354,9 +402,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Deduplicate customers on primary key",
         family="silver_dedup",
         variant="customers_pk",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="Customers Silver output contains unique customer_id values",
         description="Deduplicate customers on natural key.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.silver."
+                    "slv_04_customers_dedup_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.silver."
+                    "slv_04_customers_dedup_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.silver."
+                    "slv_04_customers_dedup_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="SLV_05",
@@ -366,9 +430,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Deduplicate accounts on primary key",
         family="silver_dedup",
         variant="accounts_pk",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="Accounts Silver output contains unique account_id values",
         description="Deduplicate accounts on natural key.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.silver."
+                    "slv_05_accounts_dedup_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.silver."
+                    "slv_05_accounts_dedup_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.silver."
+                    "slv_05_accounts_dedup_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="SLV_06",
@@ -378,9 +458,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Deduplicate transactions on primary key",
         family="silver_dedup",
         variant="transactions_pk",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="Transactions Silver output contains unique transaction_id values",
         description="Deduplicate transactions on natural key.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.silver."
+                    "slv_06_transactions_dedup_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.silver."
+                    "slv_06_transactions_dedup_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.silver."
+                    "slv_06_transactions_dedup_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="SLV_07",
@@ -390,9 +486,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Enforce standard currency representation",
         family="silver_standardisation",
         variant="currency_standardise",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="Transactions Silver output uses canonical currency representation",
         description="Standardise currency values to ZAR.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.silver."
+                    "slv_07_transactions_currency_standardise_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.silver."
+                    "slv_07_transactions_currency_standardise_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.silver."
+                    "slv_07_transactions_currency_standardise_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="SLV_08",
@@ -402,9 +514,25 @@ TRACKING_MANIFEST: tuple[TrackingUnit, ...] = (
         parent_requirement="Resolve account-to-customer linkage",
         family="silver_linkage",
         variant="account_customer_linkage",
-        candidate_engines=SHORTLIST_ENGINES,
+        candidate_engines=("polars", "pyarrow_acero", "pyspark_delta"),
         validation_gate="Accounts link cleanly to customers on the Silver path",
         description="Resolve account-to-customer linkage before Gold joins.",
+        implementations=ImplementationBundle(
+            engine_python_refs={
+                "polars": (
+                    "benchmarks.workloads.silver."
+                    "slv_08_account_customer_linkage_polars:run"
+                ),
+                "pyarrow_acero": (
+                    "benchmarks.workloads.silver."
+                    "slv_08_account_customer_linkage_pyarrow:run"
+                ),
+                "pyspark_delta": (
+                    "benchmarks.workloads.silver."
+                    "slv_08_account_customer_linkage_pyspark:run"
+                ),
+            }
+        ),
     ),
     TrackingUnit(
         id="GLD_01",
